@@ -1,0 +1,68 @@
+# config.toml
+################################################################
+# Global
+################################################################
+
+# port
+# reserved for web API interface
+port = ":9090"
+
+# secret key
+# add to all request
+secret_key = ""
+
+# Group user for basic auth
+# Example with 2 group admins/freelancers, with user test:test
+# Passwords can be encoded in MD5, SHA1 and BCrypt: you can use htpasswd to generate those ones
+#
+# [auth]
+# [auth.admins]
+# users = ["test:$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51"]
+# [auth.freelancers]
+# users = ["test:$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51"]
+
+################################################################
+# Google Cloud Engine
+################################################################
+# Google Cloud Engine
+# Example with 2 hostnames (example.com/www.example.com) allowed on 80/443 port (with TLS)
+# Access is limited basic auth (for group "admins")
+#
+# [[gce]]
+# jwt_path = "/path/to/keyJWT.json"
+# project_id = "project-id"
+# zone = "europe-west1-a"
+# name = "instance-1"
+# use_internal_ip = true
+# sleep_after = 3600 # After N seconds of inactivity, the server will be turned off, default 1200
+#   [[gce.route]]
+#   address = ":80" # Default :80
+#   hostnames = ["example.com", "www.example.com"]
+#   auth_group = "admins" # If set, enable basic auth for group <name>
+#   backend_port = 80 # If not set, default from "address" option
+#
+#   [[gce.route]]
+#   address = ":443"
+#   hostnames = ["example.com", "www.example.com"]
+#   auth_group = "admins"  # If set, enable basic auth for group <name>
+#   backend_port = 80 # If not set, default from "address" option
+#     [[gce.route.certificate]] # If set, enable TLS
+#     cert_file = "/path/to/server.crt"
+#     key_file = "/path/to/server.key"
+
+
+################################################################
+# Amazon EC2
+################################################################
+# Amazon EC2
+# Route settings are the same GCE
+#
+# [[ec2]]
+# access_key_id = "AKI..."
+# secret_access_key = "871...."
+# region = "us-west-2"
+# instance_id = "i-00..."
+# use_internal_ip = true
+# sleep_after = 3600 # After N seconds of inactivity, the server will be turned off, default 1200
+#   [[ec2.route]]
+#   hostnames = ["example-ec2.com", "www.example-ec2.com"]
