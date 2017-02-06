@@ -157,6 +157,10 @@ func TestGCE_GetStatus(t *testing.T) {
 	server := initTestCGEServer("/", `{"status":"TERMINATED"}`)
 	defer server.Close()
 
+	if os.Getenv("TRAVIS") == "true" {
+		t.Skip("no credentials on Travis")
+	}
+
 	ctx := context.TODO()
 	client, err := google.DefaultClient(ctx, compute.ComputeScope)
 	if err != nil {
@@ -187,6 +191,10 @@ func TestGCE_Start(t *testing.T) {
 	server := initTestCGEServer("/", `{"status":"STAGING", "progress": 10}`)
 	defer server.Close()
 
+	if os.Getenv("TRAVIS") == "true" {
+		t.Skip("no credentials on Travis")
+	}
+
 	ctx := context.TODO()
 	client, err := google.DefaultClient(ctx, compute.ComputeScope)
 	if err != nil {
@@ -213,6 +221,10 @@ func TestGCE_Stop(t *testing.T) {
 	server := initTestCGEServer("/", `{"status":"STOPPING", "progress": 10}`)
 	defer server.Close()
 
+	if os.Getenv("TRAVIS") == "true" {
+		t.Skip("no credentials on Travis")
+	}
+
 	ctx := context.TODO()
 	client, err := google.DefaultClient(ctx, compute.ComputeScope)
 	if err != nil {
@@ -238,6 +250,10 @@ func TestGCE_Stop(t *testing.T) {
 func TestGCE_GetIP(t *testing.T) {
 	server := initTestCGEServer("/", exampleGCEInstancesResponse)
 	defer server.Close()
+
+	if os.Getenv("TRAVIS") == "true" {
+		t.Skip("no credentials on Travis")
+	}
 
 	ctx := context.TODO()
 	client, err := google.DefaultClient(ctx, compute.ComputeScope)
@@ -268,6 +284,10 @@ func TestGCE_GetIP(t *testing.T) {
 func TestGCE_GetIP_withInternalIP(t *testing.T) {
 	server := initTestCGEServer("/", exampleGCEInstancesResponse)
 	defer server.Close()
+
+	if os.Getenv("TRAVIS") == "true" {
+		t.Skip("no credentials on Travis")
+	}
 
 	ctx := context.TODO()
 	client, err := google.DefaultClient(ctx, compute.ComputeScope)
