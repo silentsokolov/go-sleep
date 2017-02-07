@@ -4,4 +4,18 @@
 
 # go-sleep
 
-go-sleep helps to automatically stopping unused cloud instances [Google Compute Engine](https://cloud.google.com/compute/) / [Amazon EC2](https://aws.amazon.com/ec2/).
+go-sleep helps to automatically start cloud instances [Google Compute Engine](https://cloud.google.com/compute/) / [Amazon EC2](https://aws.amazon.com/ec2/) by request (HTTP) and stopping unused instances, after some time.
+
+Here is basic workflow: the go-sleep handles all incoming requests, if instance running, proxy all traffic. Else request start instance and waiting him.
+
+![Diagram](https://raw.githubusercontent.com/silentsokolov/go-sleep/master/docs/diagram.png)
+
+
+## Installation
+
+Download latest binary from https://github.com/silentsokolov/go-sleep/releases
+
+
+## Getting started
+
+Run `./go-sleep -config=/path/to/config.toml`
