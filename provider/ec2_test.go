@@ -124,7 +124,7 @@ func TestEC2_String(t *testing.T) {
 	}
 	s := "[EC2] ID: i-0 in us-west-2"
 
-	if s != inst.String() {
+	if inst.String() != s {
 		t.Errorf("GCE.String returned %+v, want %+v", inst.String(), s)
 	}
 }
@@ -138,7 +138,7 @@ func TestEC2_Hash(t *testing.T) {
 	}
 	s := "ec2-i-0-us-west-2"
 
-	if s != inst.Hash() {
+	if inst.Hash() != s {
 		t.Errorf("GCE.Hash returned %+v, want %+v", inst.Hash(), s)
 	}
 }

@@ -60,7 +60,7 @@ func (route *serverRoute) secretBasic(user, realm string) string {
 func NewServer(conf *Config) *Server {
 	server := new(Server)
 
-	server.InstanceStore = NewStore(conf)
+	server.InstanceStore = NewInstanceStore()
 	server.stopChan = make(chan bool, 1)
 	server.signals = make(chan os.Signal, 1)
 	server.portWeb = conf.Port

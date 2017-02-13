@@ -40,7 +40,7 @@ type RouteConfig struct {
 
 // String ...
 func (c *RouteConfig) String() string {
-	return fmt.Sprintf("%s:%s", c.Address, c.Hostnames[0])
+	return fmt.Sprintf("%v on %s", c.Hostnames, c.Address)
 }
 
 // CertificateConfig ...

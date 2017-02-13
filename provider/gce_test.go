@@ -135,7 +135,7 @@ func TestGCE_String(t *testing.T) {
 	}
 	s := "[GCE] Name: my-project-instance-1 in europe-west1-a"
 
-	if s != inst.String() {
+	if inst.String() != s {
 		t.Errorf("GCE.String returned %+v, want %+v", inst.String(), s)
 	}
 }
@@ -148,7 +148,7 @@ func TestGCE_Hash(t *testing.T) {
 	}
 	s := "gce-my-project-europe-west1-a-instance-1"
 
-	if s != inst.Hash() {
+	if inst.Hash() != s {
 		t.Errorf("GCE.Hash returned %+v, want %+v", inst.Hash(), s)
 	}
 }

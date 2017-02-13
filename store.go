@@ -182,17 +182,15 @@ func (instance *ComputeInstance) Stop() {
 // InstanceStore ...
 type InstanceStore struct {
 	sync.RWMutex
-	instanceWG   *sync.WaitGroup
-	instances    map[string]*ComputeInstance
-	instancesNew map[string]map[string]*ComputeInstance
+	wg     *sync.WaitGroup
+	values map[string]*ComputeInstance
 }
 
-// NewStore ...
-func NewStore(config *Config) *InstanceStore {
+// NewInstanceStore ...
+func NewInstanceStore() *InstanceStore {
 	return &InstanceStore{
-		instanceWG:   &sync.WaitGroup{},
-		instances:    make(map[string]*ComputeInstance),
-		instancesNew: make(map[string]map[string]*ComputeInstance),
+		wg:     &sync.WaitGroup{},
+		values: make(map[string]*ComputeInstance),
 	}
 }
 
@@ -201,8 +199,8 @@ func (store *InstanceStore) Set(key string, instance *ComputeInstance) error {
 	store.Lock()
 	defer store.Unlock()
 
-	store.instances[key] = instance
-	instance.startMonitor(store.instanceWG)
+	store.values[key] = instance
+	instance.startMonitor(store.wg)
 
 	return nil
 }
@@ -212,7 +210,7 @@ func (store *InstanceStore) Get(k string) (*ComputeInstance, bool) {
 	store.RLock()
 	defer store.RUnlock()
 
-	if instance, ok := store.instances[k]; ok {
+	if instance, ok := store.values[k]; ok {
 		return instance, true
 	}
 	return nil, false
@@ -220,8 +218,8 @@ func (store *InstanceStore) Get(k string) (*ComputeInstance, bool) {
 
 // Close ...
 func (store *InstanceStore) Close() {
-	for _, i := range store.instances {
+	for _, i := range store.values {
 		i.stopMonitor()
 	}
-	store.instanceWG.Wait()
+	store.wg.Wait()
 }
