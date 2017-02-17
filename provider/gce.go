@@ -3,13 +3,13 @@ package provider
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-
 	compute "google.golang.org/api/compute/v1"
+
+	"github.com/silentsokolov/go-sleep/log"
 )
 
 // GCE ..

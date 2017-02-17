@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
+	"math"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -17,6 +17,8 @@ import (
 	"time"
 
 	auth "github.com/abbot/go-http-auth"
+
+	"github.com/silentsokolov/go-sleep/log"
 	"github.com/silentsokolov/go-sleep/provider"
 )
 
@@ -41,9 +43,9 @@ type serverRoute struct {
 }
 
 type pageContext struct {
-	Message      string    `json:"message,omitempty"`
-	StartRequest time.Time `json:"request_start_at,omitempty"`
-	Error        string    `json:"error,omitempty"`
+	Message      string     `json:"message,omitempty"`
+	StartRequest *time.Time `json:"request_start_at,omitempty"`
+	Error        string     `json:"error,omitempty"`
 }
 
 func (route *serverRoute) secretBasic(user, realm string) string {
@@ -146,7 +148,6 @@ func (server *Server) buildServerRoutes(routes []*RouteConfig, instanceKey strin
 			if len(route.Address) == 0 {
 				route.Address = defaultAddress
 			}
-
 			// Set default backend port if not set
 			if route.BackendPort == 0 {
 				route.BackendPort, err = strconv.Atoi(strings.Replace(route.Address, ":", "", -1))
@@ -164,7 +165,6 @@ func (server *Server) buildServerRoutes(routes []*RouteConfig, instanceKey strin
 				BackendPort:  route.BackendPort,
 				InstanceName: instanceKey,
 			}
-
 			// Init and add cret
 			for _, cretOptions := range route.Certificates {
 				cert, err := tls.LoadX509KeyPair(cretOptions.CertFile, cretOptions.KeyFile)
@@ -243,18 +243,15 @@ func (server *Server) startServer(srv *http.Server) {
 func (server *Server) defaultReverseProxy(address string) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{
 		Director: func(r *http.Request) {
-			host, _, _ := net.SplitHostPort(r.Host)
-			route, _ := server.serverRoutes[address][host]
-			computer, _ := server.InstanceStore.Get(route.InstanceName)
-
-			if _, ok := server.serverRoutes[address][host]; ok {
+			route, computer, err := server.getRouteComputer(r.Host, address)
+			if err == nil {
 				r.Header.Set("Host", r.Host)
 				r.Header.Set("X-Go-Sleep-Key", server.secretKey)
 				r.URL.Scheme = "http"
 				r.URL.Host = fmt.Sprintf("%s:%d", computer.IP, route.BackendPort)
 				r.RequestURI = ""
 			} else {
-				log.Printf("%q is not routed", r.Host)
+				log.Warnf("%q is not routed", r.Host)
 			}
 		},
 	}
@@ -285,30 +282,16 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := pageContext{}
 
-		host, _, err := net.SplitHostPort(r.Host)
+		_, computer, err := server.getRouteComputer(r.Host, address)
 		if err != nil {
 			context.Error = err.Error()
-			renderJSON(w, context, http.StatusInternalServerError)
-			return
-		}
-
-		route, ok := server.serverRoutes[address][host]
-		if !ok {
-			context.Error = "Not found hostname"
-			renderJSON(w, context, http.StatusNotFound)
-			return
-		}
-
-		computer, ok := server.InstanceStore.Get(route.InstanceName)
-		if !ok {
-			context.Error = "Not found instance for this hostname"
-			renderJSON(w, context, http.StatusNotFound)
+			responseJSON(w, context, http.StatusInternalServerError)
 			return
 		}
 
 		if computer.lastError != nil {
 			context.Error = computer.lastError.Error()
-			renderJSON(w, context, http.StatusOK)
+			responseJSON(w, context, http.StatusOK)
 			return
 		}
 
@@ -316,23 +299,38 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 		case provider.StatusInstanceRunning:
 			computer.SetLastAccess()
 			next.ServeHTTP(w, r)
+			return
 		case provider.StatusInstanceNotRun:
 			computer.Start()
 			context.Message = "We sent a request to start the instance"
-			renderJSON(w, context, http.StatusOK)
 		case provider.StatusInstanceStarting:
 			context.Message = "Waiting for the server to start"
-			context.StartRequest = computer.startRequest
-			renderJSON(w, context, http.StatusOK)
+			context.StartRequest = &computer.startRequest
 		case provider.StatusInstanceError:
 			computer.Start()
 			context.Error = computer.lastError.Error()
-			renderJSON(w, context, http.StatusOK)
 		case provider.StatusInstanceStopping:
 			context.Message = "The server is stopped, we will launch it later"
-			renderJSON(w, context, http.StatusOK)
 		}
+
+		responseJSON(w, context, http.StatusOK)
 	})
+}
+
+func (server *Server) getRouteComputer(rawHost, address string) (*serverRoute, *ComputeInstance, error) {
+	host, _, err := net.SplitHostPort(rawHost)
+	if err != nil {
+		return nil, nil, err
+	}
+	route, ok := server.serverRoutes[address][host]
+	if !ok {
+		return nil, nil, fmt.Errorf("Not found hostname: %s", host)
+	}
+	computer, ok := server.InstanceStore.Get(route.InstanceName)
+	if !ok {
+		return nil, nil, fmt.Errorf("Not found instance for hostname: %s", host)
+	}
+	return route, computer, nil
 }
 
 func parserBasicUsers(users []string) (map[string]string, error) {
@@ -347,12 +345,13 @@ func parserBasicUsers(users []string) (map[string]string, error) {
 	return userMap, nil
 }
 
-func renderJSON(w http.ResponseWriter, context interface{}, status int) {
+func responseJSON(w http.ResponseWriter, context interface{}, status int) {
 	js, err := json.Marshal(context)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
@@ -360,8 +359,7 @@ func renderJSON(w http.ResponseWriter, context interface{}, status int) {
 func getDefaultSleepAfter(currentSleep int64) time.Duration {
 	if currentSleep > 0 {
 		return time.Duration(currentSleep) * time.Second
-	} else if currentSleep < 0 {
-		return time.Duration(100000) * time.Hour
 	}
-	return defaultSleepAfter
+
+	return time.Duration(math.MaxInt64)
 }

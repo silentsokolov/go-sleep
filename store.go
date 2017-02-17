@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
+	"github.com/silentsokolov/go-sleep/log"
 	"github.com/silentsokolov/go-sleep/provider"
 )
 
@@ -87,7 +87,7 @@ func (instance *ComputeInstance) startMonitor(wg *sync.WaitGroup) {
 						}
 					}
 				}
-			case <-time.After(2 * time.Minute):
+			case <-time.After(1 * time.Minute):
 				log.Printf("Check status for %s", instance.Provider)
 				providerStatus, err := instance.Provider.GetStatus()
 

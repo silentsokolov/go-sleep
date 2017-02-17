@@ -10,38 +10,38 @@ import (
 	"github.com/silentsokolov/go-sleep/provider"
 )
 
-type Dummy struct {
+type dummyProvider struct {
 	DummyID       string
 	UseInternalIP bool
 }
 
-func NewDummyProvider(DummyID string, UseInternalIP bool) *Dummy {
-	return &Dummy{
+func newDummyProvider(DummyID string, UseInternalIP bool) *dummyProvider {
+	return &dummyProvider{
 		DummyID: DummyID,
 	}
 }
 
-func (p *Dummy) String() string {
-	return fmt.Sprintf("[Dummy] ID: %s", p.DummyID)
+func (p *dummyProvider) String() string {
+	return fmt.Sprintf("[dummyProvider] ID: %s", p.DummyID)
 }
 
-func (p *Dummy) Hash() string {
+func (p *dummyProvider) Hash() string {
 	return fmt.Sprintf("dummy-%s", p.DummyID)
 }
 
-func (p *Dummy) GetStatus() (int, error) {
+func (p *dummyProvider) GetStatus() (int, error) {
 	return provider.StatusInstanceRunning, nil
 }
 
-func (p *Dummy) GetIP() (string, error) {
+func (p *dummyProvider) GetIP() (string, error) {
 	return "www.example.org", nil
 }
 
-func (p *Dummy) Start() error {
+func (p *dummyProvider) Start() error {
 	return nil
 }
 
-func (p *Dummy) Stop() error {
+func (p *dummyProvider) Stop() error {
 	return nil
 }
 
@@ -74,10 +74,10 @@ func TestInstanceStore_Get(t *testing.T) {
 }
 
 func TestComputeInstance_String(t *testing.T) {
-	p := NewDummyProvider("test", false)
+	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 
-	s := "Instance: [Dummy] ID: test, current status: 4"
+	s := "Instance: [dummyProvider] ID: test, current status: 4"
 
 	if ci.String() != s {
 		t.Errorf("ComputeInstance.String returned %+v, want %+v", ci.String(), s)
@@ -85,7 +85,7 @@ func TestComputeInstance_String(t *testing.T) {
 }
 
 func TestComputeInstance_Hash(t *testing.T) {
-	p := NewDummyProvider("test", false)
+	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 
 	s := "dummy-test"
@@ -96,7 +96,7 @@ func TestComputeInstance_Hash(t *testing.T) {
 }
 
 func TestComputeInstance_GetStatus(t *testing.T) {
-	p := NewDummyProvider("test", false)
+	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 
 	providerStatus, _ := p.GetStatus()
@@ -106,7 +106,7 @@ func TestComputeInstance_GetStatus(t *testing.T) {
 }
 
 func TestComputeInstance_SetStatus(t *testing.T) {
-	p := NewDummyProvider("test", false)
+	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 	providerStatus, _ := p.GetStatus()
 
@@ -121,7 +121,7 @@ func TestComputeInstance_SetStatus(t *testing.T) {
 }
 
 func TestComputeInstance_SetError(t *testing.T) {
-	p := NewDummyProvider("test", false)
+	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 	err := errors.New("test error")
 
@@ -136,7 +136,7 @@ func TestComputeInstance_SetError(t *testing.T) {
 }
 
 func TestComputeInstance_Reset(t *testing.T) {
-	p := NewDummyProvider("test", false)
+	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 	ci.lastError = errors.New("test error")
 	ci.IP = "127.0.0.1"

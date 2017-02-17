@@ -2,22 +2,25 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/BurntSushi/toml"
+
+	"github.com/silentsokolov/go-sleep/log"
 )
 
 const (
 	defaultAddress     = ":80"
 	defaultBackendPost = 80
 	defaultSleepAfter  = 20 * time.Minute
+	defaultLogLevel    = "warning"
 )
 
 // Config ...
 type Config struct {
 	Port      string                `toml:"port"`
 	SecretKey string                `toml:"secret_key"`
+	LogLevel  string                `toml:"log_level"`
 	Dummy     []*DummyConfig        `toml:"dummy"`
 	GCE       []*GCEConfig          `toml:"gce"`
 	EC2       []*EC2Config          `toml:"ec2"`
@@ -87,6 +90,10 @@ func loadConfig(filepath string) *Config {
 
 	if _, err := toml.DecodeFile(filepath, &config); err != nil {
 		log.Fatal(err)
+	}
+
+	if config.LogLevel == "" {
+		config.LogLevel = defaultLogLevel
 	}
 
 	return &config

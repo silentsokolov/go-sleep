@@ -19,3 +19,20 @@ Download latest binary from https://github.com/silentsokolov/go-sleep/releases
 ## Getting started
 
 Run `./go-sleep -config=/path/to/config.toml`
+
+
+## Config
+
+### Basic auth
+
+```toml
+# Group user for basic auth
+# Example with 2 group admins/freelancers, with user test:test
+# Passwords can be encoded in MD5, SHA1 and BCrypt: you can use htpasswd to generate those ones
+
+[auth]
+  [auth.admins]
+    users = ["test:$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51"]
+  [auth.freelancers]
+    users = ["test:$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51"]
+```

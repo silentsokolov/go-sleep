@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/silentsokolov/go-sleep/log"
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {

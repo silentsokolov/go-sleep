@@ -11,6 +11,9 @@ port = ":9090"
 # add to all request
 secret_key = ""
 
+# log level
+log_level = "info"
+
 # Group user for basic auth
 # Example with 2 group admins/freelancers, with user test:test
 # Passwords can be encoded in MD5, SHA1 and BCrypt: you can use htpasswd to generate those ones

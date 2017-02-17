@@ -1,6 +1,13 @@
 package main
 
-import "flag"
+import (
+	"flag"
+	"strings"
+
+	"github.com/Sirupsen/logrus"
+
+	"github.com/silentsokolov/go-sleep/log"
+)
 
 var (
 	configFilePath string
@@ -12,8 +19,13 @@ func init() {
 
 func main() {
 	flag.Parse()
-
 	config := loadConfig(configFilePath)
+
+	level, err := logrus.ParseLevel(strings.ToLower(config.LogLevel))
+	if err != nil {
+		log.Error("Error getting level", err)
+	}
+	log.SetLevel(level)
 
 	server := NewServer(config)
 	server.loadConfig(config)

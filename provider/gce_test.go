@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"golang.org/x/oauth2/google"
-
 	compute "google.golang.org/api/compute/v1"
 )
 
@@ -179,7 +178,7 @@ func TestGCE_GetStatus(t *testing.T) {
 
 	status, err := inst.GetStatus()
 	if err != nil {
-		t.Errorf("GCE.GetStatus returned unexpected error: %v", err)
+		t.Fatalf("GCE.GetStatus returned unexpected error: %v", err)
 	}
 
 	if status != StatusInstanceNotRun {
@@ -308,7 +307,7 @@ func TestGCE_GetIP_withInternalIP(t *testing.T) {
 
 	ip, err := inst.GetIP()
 	if err != nil {
-		t.Errorf("GCE.GetIP (UseInternalIP) returned unexpected error: %v", err)
+		t.Fatalf("GCE.GetIP (UseInternalIP) returned unexpected error: %v", err)
 	}
 
 	if ip != "192.168.1.88" {
