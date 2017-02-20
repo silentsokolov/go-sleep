@@ -39,7 +39,7 @@ func TestGetDefaultSleepAfter(t *testing.T) {
 		out time.Duration
 	}{
 		{100, time.Duration(100) * time.Second},
-		{0, time.Duration(math.MaxInt64)},
+		{0, defaultSleepAfter},
 		{-1, time.Duration(math.MaxInt64)},
 	}
 
@@ -64,5 +64,27 @@ func TestParserBasicUsers(t *testing.T) {
 	}
 	if !reflect.DeepEqual(usersMap, want) {
 		t.Errorf("parserBasicUsers returned %+v, want %+v", usersMap, want)
+	}
+}
+
+func TestServerRoute_SecretBasic(t *testing.T) {
+	route := &serverRoute{}
+	route.basicUsers = map[string]string{
+		"test": "$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51",
+		"user": "test:test",
+	}
+
+	var userTable = []struct {
+		in  string
+		out string
+	}{
+		{"test", "$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51"},
+		{"unknown", ""},
+	}
+
+	for _, test := range userTable {
+		if s := route.secretBasic(test.in, ""); s != test.out {
+			t.Errorf("serverRoute.secretBasic returned %v, want %v", s, test.out)
+		}
 	}
 }

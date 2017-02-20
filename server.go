@@ -359,7 +359,8 @@ func responseJSON(w http.ResponseWriter, context interface{}, status int) {
 func getDefaultSleepAfter(currentSleep int64) time.Duration {
 	if currentSleep > 0 {
 		return time.Duration(currentSleep) * time.Second
+	} else if currentSleep < 0 {
+		return time.Duration(math.MaxInt64)
 	}
-
-	return time.Duration(math.MaxInt64)
+	return defaultSleepAfter
 }
