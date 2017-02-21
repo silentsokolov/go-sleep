@@ -29,11 +29,11 @@ func (p *dummyProvider) Hash() string {
 	return fmt.Sprintf("dummy-%s", p.DummyID)
 }
 
-func (p *dummyProvider) GetStatus() (int, error) {
+func (p *dummyProvider) Status() (provider.StatusInstance, error) {
 	return provider.StatusInstanceRunning, nil
 }
 
-func (p *dummyProvider) GetIP() (string, error) {
+func (p *dummyProvider) IP() (string, error) {
 	return "www.example.org", nil
 }
 
@@ -77,7 +77,7 @@ func TestComputeInstance_String(t *testing.T) {
 	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 
-	s := "Instance: [dummyProvider] ID: test, current status: 4"
+	s := "Instance: [dummyProvider] ID: test, current status: running"
 
 	if ci.String() != s {
 		t.Errorf("ComputeInstance.String returned %+v, want %+v", ci.String(), s)
@@ -95,28 +95,28 @@ func TestComputeInstance_Hash(t *testing.T) {
 	}
 }
 
-func TestComputeInstance_GetStatus(t *testing.T) {
+func TestComputeInstance_Status(t *testing.T) {
 	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
 
-	providerStatus, _ := p.GetStatus()
-	if ci.GetStatus() != providerStatus {
-		t.Errorf("ComputeInstance.GetStatus returned %+v, want %+v", ci.GetStatus(), providerStatus)
+	providerStatus, _ := p.Status()
+	if ci.Status() != providerStatus {
+		t.Errorf("ComputeInstance.Status returned %+v, want %+v", ci.Status(), providerStatus)
 	}
 }
 
 func TestComputeInstance_SetStatus(t *testing.T) {
 	p := newDummyProvider("test", false)
 	ci := NewComputeInstance(p, time.Duration(100)*time.Second)
-	providerStatus, _ := p.GetStatus()
+	providerStatus, _ := p.Status()
 
 	if ci.currentStatus != providerStatus {
 		t.Error("ComputeInstance.SetStatus init status not correct")
 	}
 
 	ci.SetStatus(provider.StatusInstanceNotRun)
-	if ci.GetStatus() != provider.StatusInstanceNotRun {
-		t.Errorf("ComputeInstance.SetStatus setted %+v, want %+v", ci.GetStatus(), provider.StatusInstanceNotRun)
+	if ci.Status() != provider.StatusInstanceNotRun {
+		t.Errorf("ComputeInstance.SetStatus setted %+v, want %+v", ci.Status(), provider.StatusInstanceNotRun)
 	}
 }
 

@@ -33,7 +33,7 @@ func TestResponseJSON(t *testing.T) {
 	}
 }
 
-func TestGetDefaultSleepAfter(t *testing.T) {
+func TestSleepDuration(t *testing.T) {
 	var timeTable = []struct {
 		in  int64
 		out time.Duration
@@ -44,8 +44,8 @@ func TestGetDefaultSleepAfter(t *testing.T) {
 	}
 
 	for _, test := range timeTable {
-		if s := getDefaultSleepAfter(test.in); s != test.out {
-			t.Errorf("getDefaultSleepAfter returned %v, want %v", s, test.out)
+		if s := sleepDuration(test.in); s != test.out {
+			t.Errorf("sleepDuration returned %v, want %v", s, test.out)
 		}
 	}
 }

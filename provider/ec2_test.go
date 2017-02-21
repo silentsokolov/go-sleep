@@ -70,7 +70,7 @@ func TestNewEC2(t *testing.T) {
 	}
 }
 
-func TestEC2_GetStatus(t *testing.T) {
+func TestEC2_Status(t *testing.T) {
 	server := initTestEC2Server("/", exampleDescribeInstancesResponse)
 	defer server.Close()
 
@@ -84,20 +84,20 @@ func TestEC2_GetStatus(t *testing.T) {
 		ec2Service:      svc,
 	}
 
-	status, err := inst.GetStatus()
+	status, err := inst.Status()
 	if err != nil {
-		t.Errorf("EC2.GetStatus returned unexpected error: %v", err)
+		t.Errorf("EC2.Status returned unexpected error: %v", err)
 	}
 
 	if status != StatusInstanceNotRun {
-		t.Errorf("EC2.GetStatus returned %+v, want %+v", status, StatusInstanceNotRun)
+		t.Errorf("EC2.Status returned %+v, want %+v", status, StatusInstanceNotRun)
 	}
 }
 
 func TestNormalizeEC2Status(t *testing.T) {
 	var statusTable = []struct {
 		in  string
-		out int
+		out StatusInstance
 	}{
 		{"pending", StatusInstanceStarting},
 		{"running", StatusInstanceRunning},
@@ -183,7 +183,7 @@ func TestEC2_Stop(t *testing.T) {
 	}
 }
 
-func TestEC2_GetIP(t *testing.T) {
+func TestEC2_IP(t *testing.T) {
 	server := initTestEC2Server("/", exampleDescribeInstancesResponse)
 	defer server.Close()
 
@@ -197,17 +197,17 @@ func TestEC2_GetIP(t *testing.T) {
 		ec2Service:      svc,
 	}
 
-	ip, err := inst.GetIP()
+	ip, err := inst.IP()
 	if err != nil {
-		t.Errorf("EC2.GetIP returned unexpected error: %v", err)
+		t.Errorf("EC2.IP returned unexpected error: %v", err)
 	}
 
 	if ip != "10.10.10.1" {
-		t.Errorf("EC2.GetIP returned %+v, want %+v", ip, "10.10.10.1")
+		t.Errorf("EC2.IP returned %+v, want %+v", ip, "10.10.10.1")
 	}
 }
 
-func TestEC2_GetIP_withInternalIP(t *testing.T) {
+func TestEC2_IP_withInternalIP(t *testing.T) {
 	server := initTestEC2Server("/", exampleDescribeInstancesResponse)
 	defer server.Close()
 
@@ -222,12 +222,12 @@ func TestEC2_GetIP_withInternalIP(t *testing.T) {
 		ec2Service:      svc,
 	}
 
-	ip, err := inst.GetIP()
+	ip, err := inst.IP()
 	if err != nil {
-		t.Errorf("EC2.GetIP returned unexpected error: %v", err)
+		t.Errorf("EC2.IP returned unexpected error: %v", err)
 	}
 
 	if ip != "192.168.1.88" {
-		t.Errorf("EC2.GetIP returned %+v, want %+v", ip, "192.168.1.88")
+		t.Errorf("EC2.IP returned %+v, want %+v", ip, "192.168.1.88")
 	}
 }

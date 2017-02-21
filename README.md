@@ -23,7 +23,9 @@ Run `./go-sleep -config=/path/to/config.toml`
 
 ## Config
 
-### global
+Please refer to the [config.sample.toml](https://github.com/silentsokolov/go-sleep/blob/master/config.sample.toml) to get full documentation.
+
+### Global
 
 ```toml
 # Port
@@ -32,7 +34,7 @@ port = ":9090"
 
 # Secret key
 # Is passed along with every request to that site in the X-Go-Sleep-Key header
-secret_key = ""
+secret_key = "my-secret-key"
 
 # Log level
 log_level = "info"
@@ -54,4 +56,29 @@ log_level = "info"
     users = ["test:$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51"]
   [auth.freelancers]
     users = ["test:$apr1$bfLZ0ZMK$CYhTBqS.Yl.V1hbOpHze51"]
+```
+
+### Instance (Google Compute Engine)
+
+```toml
+# This example register one GCE instance with two hostnames (example.com and www.example.com) on 80/443 port (with TLS)
+# Access is limited basic auth (for group "admins")
+[[gce]]
+jwt_path = "/path/to/key_jwt.json"
+project_id = "project-test-12"
+zone = "europe-west1-a"
+name = "instance-1"
+  [[gce.route]]
+  address = ":80"
+  hostnames = ["example.com", "www.example.com"]
+  auth_group = "admins"
+
+  [[gce.route]]
+  address = ":443"
+  hostnames = ["example.com", "www.example.com"]
+  auth_group = "admins"
+  backend_port = 80
+    [[gce.route.certificate]]
+    cert_file = "/path/to/server.crt"
+    key_file = "/path/to/server.key"
 ```

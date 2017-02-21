@@ -107,7 +107,7 @@ func TestNewGCE(t *testing.T) {
 func TestNormalizeGCEStatus(t *testing.T) {
 	var statusTable = []struct {
 		in  string
-		out int
+		out StatusInstance
 	}{
 		{"PROVISIONING", StatusInstanceStarting},
 		{"STAGING", StatusInstanceStarting},
@@ -152,7 +152,7 @@ func TestGCE_Hash(t *testing.T) {
 	}
 }
 
-func TestGCE_GetStatus(t *testing.T) {
+func TestGCE_Status(t *testing.T) {
 	server := initTestCGEServer("/", `{"status":"TERMINATED"}`)
 	defer server.Close()
 
@@ -176,13 +176,13 @@ func TestGCE_GetStatus(t *testing.T) {
 		computeService: computeService,
 	}
 
-	status, err := inst.GetStatus()
+	status, err := inst.Status()
 	if err != nil {
-		t.Fatalf("GCE.GetStatus returned unexpected error: %v", err)
+		t.Fatalf("GCE.Status returned unexpected error: %v", err)
 	}
 
 	if status != StatusInstanceNotRun {
-		t.Errorf("GCE.GetStatus returned %+v, want %+v", status, StatusInstanceNotRun)
+		t.Errorf("GCE.Status returned %+v, want %+v", status, StatusInstanceNotRun)
 	}
 }
 
@@ -246,7 +246,7 @@ func TestGCE_Stop(t *testing.T) {
 	}
 }
 
-func TestGCE_GetIP(t *testing.T) {
+func TestGCE_IP(t *testing.T) {
 	server := initTestCGEServer("/", exampleGCEInstancesResponse)
 	defer server.Close()
 
@@ -270,17 +270,17 @@ func TestGCE_GetIP(t *testing.T) {
 		computeService: computeService,
 	}
 
-	ip, err := inst.GetIP()
+	ip, err := inst.IP()
 	if err != nil {
-		t.Errorf("GCE.GetIP returned unexpected error: %v", err)
+		t.Errorf("GCE.IP returned unexpected error: %v", err)
 	}
 
 	if ip != "10.10.10.1" {
-		t.Errorf("GCE.GetIP returned %+v, want %+v", ip, "10.10.10.1")
+		t.Errorf("GCE.IP returned %+v, want %+v", ip, "10.10.10.1")
 	}
 }
 
-func TestGCE_GetIP_withInternalIP(t *testing.T) {
+func TestGCE_IP_withInternalIP(t *testing.T) {
 	server := initTestCGEServer("/", exampleGCEInstancesResponse)
 	defer server.Close()
 
@@ -305,13 +305,13 @@ func TestGCE_GetIP_withInternalIP(t *testing.T) {
 		computeService: computeService,
 	}
 
-	ip, err := inst.GetIP()
+	ip, err := inst.IP()
 	if err != nil {
-		t.Fatalf("GCE.GetIP (UseInternalIP) returned unexpected error: %v", err)
+		t.Fatalf("GCE.IP (UseInternalIP) returned unexpected error: %v", err)
 	}
 
 	if ip != "192.168.1.88" {
-		t.Errorf("GCE.GetIP (UseInternalIP) returned %+v, want %+v", ip, "192.168.1.88")
+		t.Errorf("GCE.IP (UseInternalIP) returned %+v, want %+v", ip, "192.168.1.88")
 	}
 }
 

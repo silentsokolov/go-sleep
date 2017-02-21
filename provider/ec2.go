@@ -49,8 +49,8 @@ func (p *EC2) Hash() string {
 	return fmt.Sprintf("ec2-%s-%s", p.InstanceID, p.Region)
 }
 
-// GetStatus ...
-func (p *EC2) GetStatus() (int, error) {
+// Status ...
+func (p *EC2) Status() (StatusInstance, error) {
 	inst, err := p.getInstance()
 	if err != nil {
 		return StatusInstanceNotAvailable, err
@@ -59,8 +59,8 @@ func (p *EC2) GetStatus() (int, error) {
 	return normalizeEC2Status(*inst.State.Name), nil
 }
 
-// GetIP ...
-func (p *EC2) GetIP() (string, error) {
+// IP ...
+func (p *EC2) IP() (string, error) {
 	inst, err := p.getInstance()
 	if err != nil {
 		return "", err
@@ -132,7 +132,7 @@ func (p *EC2) getInstance() (*ec2.Instance, error) {
 	return instances[0], nil
 }
 
-func normalizeEC2Status(originalStatus string) int {
+func normalizeEC2Status(originalStatus string) StatusInstance {
 	switch originalStatus {
 	case "pending":
 		return StatusInstanceStarting

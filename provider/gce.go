@@ -56,8 +56,8 @@ func (p *GCE) Hash() string {
 	return fmt.Sprintf("gce-%s-%s-%s", p.ProjectID, p.Zone, p.Name)
 }
 
-// GetStatus ...
-func (p *GCE) GetStatus() (int, error) {
+// Status ...
+func (p *GCE) Status() (StatusInstance, error) {
 	inst, err := p.computeService.Instances.Get(p.ProjectID, p.Zone, p.Name).Do()
 	if err != nil {
 		return StatusInstanceNotAvailable, err
@@ -66,8 +66,8 @@ func (p *GCE) GetStatus() (int, error) {
 	return normalizeGCEStatus(inst.Status), nil
 }
 
-// GetIP ...
-func (p *GCE) GetIP() (string, error) {
+// IP ...
+func (p *GCE) IP() (string, error) {
 	inst, err := p.computeService.Instances.Get(p.ProjectID, p.Zone, p.Name).Do()
 	if err != nil {
 		return "", err
@@ -97,7 +97,7 @@ func (p *GCE) Stop() error {
 	return nil
 }
 
-func normalizeGCEStatus(originalStatus string) int {
+func normalizeGCEStatus(originalStatus string) StatusInstance {
 	switch originalStatus {
 	case "PROVISIONING":
 		return StatusInstanceStarting

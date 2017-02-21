@@ -7,12 +7,12 @@
 # Reserved for web API interface
 port = ":9090"
 
+# Log level
+# log_level = "warning"
+
 # Secret key
 # Is passed along with every request to that site in the X-Go-Sleep-Key header
-secret_key = ""
-
-# Log level
-log_level = "info"
+# secret_key = ""
 
 # Group user for basic auth
 # Passwords can be encoded in MD5, SHA1 and BCrypt: you can use htpasswd to generate those ones
@@ -25,45 +25,40 @@ log_level = "info"
 ################################################################
 # Google Cloud Engine
 ################################################################
-# Google Cloud Engine
-# Example with 2 hostnames (example.com/www.example.com) allowed on 80/443 port (with TLS)
-# Access is limited basic auth (for group "admins")
-#
+
 # [[gce]]
-# jwt_path = "/path/to/keyJWT.json"
-# project_id = "project-id"
-# zone = "europe-west1-a"
-# name = "instance-1"
-# use_internal_ip = true
-# sleep_after = 3600 # After N seconds of inactivity, the server will be turned off, default 1200
-#   [[gce.route]]
-#   address = ":80" # Default :80
-#   hostnames = ["example.com", "www.example.com"]
-#   auth_group = "admins" # If set, enable basic auth for group <name>
-#   backend_port = 80 # If not set, default from "address" option
-#
-#   [[gce.route]]
-#   address = ":443"
-#   hostnames = ["example.com", "www.example.com"]
-#   auth_group = "admins"  # If set, enable basic auth for group <name>
-#   backend_port = 80 # If not set, default from "address" option
-#     [[gce.route.certificate]] # If set, enable TLS
-#     cert_file = "/path/to/server.crt"
-#     key_file = "/path/to/server.key"
+# jwt_path = "/path/to/key_jwt.json"
+# project_id = "project-id>"
+# zone = "europe"
+# name = "name"
+# use_internal_ip = false  # if set true, go-sleep will use the internal IP, default false
+# sleep_after = 1200  # after N seconds of inactivity, the server will be turned off, default 1200
+#  [[gce.route]]
+#  address = ":80" # Default :80
+#  hostnames = ["<hostname.local>"]
+#  auth_group = "<group_name>"  # if set, enabled basic auth
+#  backend_port = 80  # if not set, use value from "address" option
+#    [[gce.route.certificate]]  # if set, enable TLS
+#    cert_file = "/path/to/server.crt"
+#    key_file = "/path/to/server.key"
 
 
 ################################################################
 # Amazon EC2
 ################################################################
-# Amazon EC2
-# Route settings are the same GCE
-#
+
 # [[ec2]]
-# access_key_id = "AKI..."
-# secret_access_key = "871...."
-# region = "us-west-2"
-# instance_id = "i-00..."
-# use_internal_ip = true
-# sleep_after = 3600 # After N seconds of inactivity, the server will be turned off, default 1200
-#   [[ec2.route]]
-#   hostnames = ["example-ec2.com", "www.example-ec2.com"]
+# access_key_id = "KEY_ID"
+# secret_access_key = "ACCESS_KEY"
+# region = "us-west"
+# instance_id = "instance-00"
+# use_internal_ip = false  # if set true, go-sleep will use the internal IP, default false
+# sleep_after = 1200  # After N seconds of inactivity, the server will be turned off, default 1200
+#  [[gce.route]]
+#  address = ":80" # Default :80
+#  hostnames = ["<hostname.local>"]
+#  auth_group = "<group_name>"  # if set, enabled basic auth
+#  backend_port = 80  # if not set, use value from "address" option
+#    [[gce.route.certificate]]  # if set, enable TLS
+#    cert_file = "/path/to/server.crt"
+#    key_file = "/path/to/server.key"

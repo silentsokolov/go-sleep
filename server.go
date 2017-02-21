@@ -118,7 +118,7 @@ func (server *Server) loadConfig(config *Config) {
 
 	for _, conf := range config.EC2 {
 		log.Println("Initialization EC2 instances ...")
-		sleep = getDefaultSleepAfter(conf.SleepAfter)
+		sleep = sleepDuration(conf.SleepAfter)
 		instance = NewComputeInstance(provider.NewEC2(conf.AccessKeyID, conf.SecretAccessKey, conf.Region, conf.InstanceID, conf.UseInternalIP), sleep)
 		instanceHash = instance.Hash()
 		server.InstanceStore.Set(instanceHash, instance)
@@ -129,7 +129,7 @@ func (server *Server) loadConfig(config *Config) {
 
 	for _, conf := range config.GCE {
 		log.Println("Initialization GCE instances ...")
-		sleep = getDefaultSleepAfter(conf.SleepAfter)
+		sleep = sleepDuration(conf.SleepAfter)
 		instance = NewComputeInstance(provider.NewGCE(conf.JWTPath, conf.ProjectID, conf.Zone, conf.Name, conf.UseInternalIP), sleep)
 		instanceHash = instance.Hash()
 		server.InstanceStore.Set(instanceHash, instance)
@@ -243,7 +243,7 @@ func (server *Server) startServer(srv *http.Server) {
 func (server *Server) defaultReverseProxy(address string) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{
 		Director: func(r *http.Request) {
-			route, computer, err := server.getRouteComputer(r.Host, address)
+			route, computer, err := server.routeComputer(r.Host, address)
 			if err == nil {
 				r.Header.Set("Host", r.Host)
 				r.Header.Set("X-Go-Sleep-Key", server.secretKey)
@@ -282,7 +282,7 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := pageContext{}
 
-		_, computer, err := server.getRouteComputer(r.Host, address)
+		_, computer, err := server.routeComputer(r.Host, address)
 		if err != nil {
 			context.Error = err.Error()
 			responseJSON(w, context, http.StatusInternalServerError)
@@ -295,7 +295,7 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 			return
 		}
 
-		switch computer.GetStatus() {
+		switch computer.Status() {
 		case provider.StatusInstanceRunning:
 			computer.SetLastAccess()
 			next.ServeHTTP(w, r)
@@ -317,7 +317,7 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 	})
 }
 
-func (server *Server) getRouteComputer(rawHost, address string) (*serverRoute, *ComputeInstance, error) {
+func (server *Server) routeComputer(rawHost, address string) (*serverRoute, *ComputeInstance, error) {
 	host, _, err := net.SplitHostPort(rawHost)
 	if err != nil {
 		return nil, nil, err
@@ -356,7 +356,7 @@ func responseJSON(w http.ResponseWriter, context interface{}, status int) {
 	w.Write(js)
 }
 
-func getDefaultSleepAfter(currentSleep int64) time.Duration {
+func sleepDuration(currentSleep int64) time.Duration {
 	if currentSleep > 0 {
 		return time.Duration(currentSleep) * time.Second
 	} else if currentSleep < 0 {

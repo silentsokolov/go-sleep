@@ -12,11 +12,11 @@ import (
 // ComputeInstance ...
 type ComputeInstance struct {
 	sync.RWMutex
-	currentStatus int
+	currentStatus provider.StatusInstance
 	sleepAfter    time.Duration
 	Provider      provider.Provider
 	IP            string
-	statusChan    chan int
+	statusChan    chan provider.StatusInstance
 	stopChan      chan bool
 	lastAccess    time.Time
 	lastError     error
@@ -25,7 +25,7 @@ type ComputeInstance struct {
 
 // NewComputeInstance ...
 func NewComputeInstance(p provider.Provider, sleepAfter time.Duration) *ComputeInstance {
-	status, err := p.GetStatus()
+	status, err := p.Status()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,12 +34,12 @@ func NewComputeInstance(p provider.Provider, sleepAfter time.Duration) *ComputeI
 		currentStatus: status,
 		sleepAfter:    sleepAfter,
 		Provider:      p,
-		statusChan:    make(chan int, 5),
+		statusChan:    make(chan provider.StatusInstance, 5),
 		stopChan:      make(chan bool),
 	}
 
 	if status == provider.StatusInstanceRunning {
-		if instance.IP, err = p.GetIP(); err != nil {
+		if instance.IP, err = p.IP(); err != nil {
 			log.Fatal(err)
 		}
 		instance.SetLastAccess()
@@ -49,7 +49,7 @@ func NewComputeInstance(p provider.Provider, sleepAfter time.Duration) *ComputeI
 }
 
 func (instance *ComputeInstance) String() string {
-	return fmt.Sprintf("Instance: %s, current status: %d", instance.Provider.String(), instance.currentStatus)
+	return fmt.Sprintf("Instance: %s, current status: %s", instance.Provider.String(), instance.currentStatus)
 }
 
 // Hash ...
@@ -67,7 +67,7 @@ func (instance *ComputeInstance) startMonitor(wg *sync.WaitGroup) {
 			case status := <-instance.statusChan:
 				log.Printf("Change status for %s", instance.Provider)
 
-				if instance.GetStatus() != status {
+				if instance.Status() != status {
 					switch status {
 					case provider.StatusInstanceStarting:
 						log.Printf("Starting %s", instance)
@@ -89,7 +89,7 @@ func (instance *ComputeInstance) startMonitor(wg *sync.WaitGroup) {
 				}
 			case <-time.After(1 * time.Minute):
 				log.Printf("Check status for %s", instance.Provider)
-				providerStatus, err := instance.Provider.GetStatus()
+				providerStatus, err := instance.Provider.Status()
 
 				if err != nil {
 					log.Printf("Get status %s raise error: %s", instance, err)
@@ -99,7 +99,7 @@ func (instance *ComputeInstance) startMonitor(wg *sync.WaitGroup) {
 				if providerStatus != instance.currentStatus {
 					switch providerStatus {
 					case provider.StatusInstanceRunning:
-						if instance.IP, err = instance.Provider.GetIP(); err != nil {
+						if instance.IP, err = instance.Provider.IP(); err != nil {
 							instance.SetError(err)
 							instance.SetStatus(provider.StatusInstanceError)
 							break
@@ -131,15 +131,15 @@ func (instance *ComputeInstance) stopMonitor() {
 	}()
 }
 
-// GetStatus ...
-func (instance *ComputeInstance) GetStatus() int {
+// Status ...
+func (instance *ComputeInstance) Status() provider.StatusInstance {
 	instance.RLock()
 	defer instance.RUnlock()
 	return instance.currentStatus
 }
 
 // SetStatus ...
-func (instance *ComputeInstance) SetStatus(s int) {
+func (instance *ComputeInstance) SetStatus(s provider.StatusInstance) {
 	instance.Lock()
 	defer instance.Unlock()
 	instance.currentStatus = s
