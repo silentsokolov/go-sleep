@@ -32,7 +32,7 @@ port = ":9090"
 # zone = "europe"
 # name = "name"
 # use_internal_ip = false  # if set true, go-sleep will use the internal IP, default false
-# sleep_after = 1200  # after N seconds of inactivity, the server will be turned off, default 1200
+# sleep_after = 1200  # after N seconds of inactivity, the server will be turned off. 0 - default (1200), -1 disable, N - seconds
 #  [[gce.route]]
 #  address = ":80" # Default :80
 #  hostnames = ["<hostname.local>"]
@@ -53,7 +53,7 @@ port = ":9090"
 # region = "us-west"
 # instance_id = "instance-00"
 # use_internal_ip = false  # if set true, go-sleep will use the internal IP, default false
-# sleep_after = 1200  # After N seconds of inactivity, the server will be turned off, default 1200
+# sleep_after = 1200  # After N seconds of inactivity, the server will be turned off. 0 - default (1200), -1 disable, N - seconds
 #  [[gce.route]]
 #  address = ":80" # Default :80
 #  hostnames = ["<hostname.local>"]
