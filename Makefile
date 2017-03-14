@@ -10,6 +10,9 @@ build: get
 clean:
 	@rm -rf go-sleep-* go-sleep build debian
 
+get:
+	${GO} get -t -v ./...
+
 install-gox:
 	${GO} get github.com/mitchellh/gox
 
