@@ -2,8 +2,63 @@
 <html>
 <head>
     <title>Go Sleep</title>
+    <style>
+    @import "bourbon";
+
+    body, html {
+        font-family: Helvetica;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    div {
+        @include box-sizing(border-box);
+    }
+
+    .column {
+        width: 50%;
+        height: 100%;
+        float: left;
+        padding: 1em;
+        background: white;
+    }
+
+    .container {
+        text-align: center;
+        height: 100%;
+        position: relative;
+    }
+
+    .vertical-align-wrap {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: table;
+    }
+
+    .vertical-align {
+        display: table-cell;
+    }
+
+    .vertical-align--middle {
+        vertical-align: middle;
+    }
+    </style>
 </head>
 <body>
-    Waiting for the server to start
+    <div class="container">
+        <div class="vertical-align-wrap">
+            <div class="vertical-align vertical-align--middle">
+                <h1>{{.Message}}</h1>
+                {{if (CheckExistsTime .StartRequest)}}
+                    <p>Send request at {{.StartRequest.Format "2006-Jan-02 15:04:05"}}</p>
+                {{end}}
+                {{if .Error}}
+                    <p>{{.Error}}</p>
+                {{end}}
+            </div>
+        </div>
+    </div>
 </body>
 </html>

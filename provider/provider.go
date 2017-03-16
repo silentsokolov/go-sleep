@@ -1,5 +1,6 @@
 package provider
 
+// StatusInstance ...
 type StatusInstance int
 
 const (

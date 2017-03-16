@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"strings"
 
 	"github.com/Sirupsen/logrus"
@@ -11,6 +12,7 @@ import (
 
 var (
 	configFilePath string
+	templates      *template.Template
 )
 
 func init() {
@@ -20,6 +22,7 @@ func init() {
 func main() {
 	flag.Parse()
 	config := loadConfig(configFilePath)
+	templates = template.Must(template.New("").Funcs(templateFuncMap).ParseGlob("templates/*"))
 
 	level, err := logrus.ParseLevel(strings.ToLower(config.LogLevel))
 	if err != nil {

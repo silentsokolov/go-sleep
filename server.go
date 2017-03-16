@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"math"
 	"net"
 	"net/http"
@@ -25,7 +24,6 @@ import (
 // Server ...
 type Server struct {
 	InstanceStore *InstanceStore
-	templates     *template.Template
 	stopChan      chan bool
 	signals       chan os.Signal
 	portWeb       string
@@ -354,6 +352,16 @@ func responseJSON(w http.ResponseWriter, context interface{}, status int) {
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
+}
+
+func responseHTML(w http.ResponseWriter, context interface{}, status int) {
+	w.WriteHeader(status)
+
+	err := templates.ExecuteTemplate(w, "index.html", context)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func sleepDuration(currentSleep int64) time.Duration {
