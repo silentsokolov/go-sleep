@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"math"
 	"net"
@@ -283,13 +282,13 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 		_, computer, err := server.routeComputer(r.Host, address)
 		if err != nil {
 			context.Error = err.Error()
-			responseJSON(w, context, http.StatusInternalServerError)
+			responseHTML(w, http.StatusInternalServerError, "wait.html", context)
 			return
 		}
 
 		if computer.lastError != nil {
 			context.Error = computer.lastError.Error()
-			responseJSON(w, context, http.StatusOK)
+			responseHTML(w, http.StatusOK, "wait.html", context)
 			return
 		}
 
@@ -311,7 +310,7 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 			context.Message = "The server is stopped, we will launch it later"
 		}
 
-		responseJSON(w, context, http.StatusOK)
+		responseHTML(w, http.StatusOK, "wait.html", context)
 	})
 }
 
@@ -341,27 +340,6 @@ func parserBasicUsers(users []string) (map[string]string, error) {
 		userMap[split[0]] = split[1]
 	}
 	return userMap, nil
-}
-
-func responseJSON(w http.ResponseWriter, context interface{}, status int) {
-	js, err := json.Marshal(context)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.WriteHeader(status)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
-}
-
-func responseHTML(w http.ResponseWriter, context interface{}, status int) {
-	w.WriteHeader(status)
-
-	err := templates.ExecuteTemplate(w, "index.html", context)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 }
 
 func sleepDuration(currentSleep int64) time.Duration {

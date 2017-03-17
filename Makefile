@@ -1,39 +1,32 @@
 .PHONY: clean build
 
-GO ?= go
 VERSION = $(shell git describe --tags --always)
 NAME := go-sleep
 
-build: get
-	${GO} build -ldflags "-X main.version=${VERSION}" -o go-sleep
+prepare:
+	@go get github.com/BurntSushi/toml/...
+	@go get github.com/jteeuwen/go-bindata/...
+	@go get github.com/Sirupsen/logrus/...
+	@go get github.com/abbot/go-http-auth/...
+	@go get github.com/aws/aws-sdk-go/...
+	@go get github.com/mitchellh/gox/...
+	@echo Now you should be ready to run "make"
+
+build: test
+	@go build -ldflags "-X main.version=${VERSION}" -o go-sleep
 
 clean:
-	@rm -rf go-sleep-* go-sleep build debian
+	@rm -rf go-sleep-* go-sleep build templates.go
 
-get:
-	${GO} get -t -v ./...
-
-install-gox:
-	${GO} get github.com/mitchellh/gox
-
-release: clean install-gox
+release: test
 	gox \
 	-ldflags="-X main.VERSION=${VERSION}" \
 	-os="linux" \
 	-output="build/{{.Dir}}_{{.OS}}_{{.Arch}}"
 
-	cp config.sample.toml build/
-	cp -R templates build/
-	cd build; \
-	for target in go-sleep_*; \
-	do \
-		cp $$target $(NAME); \
-		tar -cvzf $$target.tar.gz $(NAME) config.sample.toml templates; \
-		rm $(NAME); \
-		rm $$target; \
-	done; \
-	rm -R templates; \
-	rm config.sample.toml;
-
 version:
 	@echo $(VERSION)
+
+test:
+	@go generate
+	@go test -parallel 4 ./...

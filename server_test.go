@@ -2,36 +2,10 @@ package main
 
 import (
 	"math"
-	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
 )
-
-func TestResponseJSON(t *testing.T) {
-	req, err := http.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	context := pageContext{Message: "Test message"}
-	recorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		responseJSON(w, context, http.StatusBadRequest)
-	})
-
-	handler.ServeHTTP(recorder, req)
-
-	if status := recorder.Code; status != http.StatusBadRequest {
-		t.Errorf("responseJSON returned wrong status code: got %v want %v", status, http.StatusBadRequest)
-	}
-
-	expected := `{"message":"Test message"}`
-	if recorder.Body.String() != expected {
-		t.Errorf("responseJSON returned unexpected body: got %v want %v", recorder.Body.String(), expected)
-	}
-}
 
 func TestSleepDuration(t *testing.T) {
 	var timeTable = []struct {

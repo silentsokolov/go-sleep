@@ -20,9 +20,15 @@ _cgo_export.*
 
 _testmain.go
 
+coverage.txt
+
 *.exe
 *.test
 *.prof
 
+# autogen
+templates.go
+
+# binary
 go-sleep*
 gin-bin
