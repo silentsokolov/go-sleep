@@ -279,7 +279,7 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		context := pageContext{}
 
-		_, computer, err := server.routeComputer(r.Host, address)
+		route, computer, err := server.routeComputer(r.Host, address)
 		if err != nil {
 			context.Error = err.Error()
 			responseHTML(w, http.StatusInternalServerError, "wait.html", context)
@@ -294,6 +294,17 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 
 		switch computer.Status() {
 		case provider.StatusInstanceRunning:
+			if !computer.HTTPHealth {
+				url := fmt.Sprintf("http://%s:%d", computer.IP, route.BackendPort)
+				_, err := ping(url, 3*time.Second)
+				if err, ok := err.(net.Error); ok && err.Timeout() {
+					context.Message = "The server is running, but has not passed HTTP heath"
+					context.StartRequest = &computer.startRequest
+					break
+				}
+
+				computer.SetHTTPHealth()
+			}
 			computer.SetLastAccess()
 			next.ServeHTTP(w, r)
 			return
@@ -349,4 +360,17 @@ func sleepDuration(currentSleep int64) time.Duration {
 		return time.Duration(math.MaxInt64)
 	}
 	return defaultSleepAfter
+}
+
+func ping(url string, timeout time.Duration) (int, error) {
+	client := http.Client{Timeout: timeout}
+	r, err := client.Head(url)
+
+	if err != nil {
+		return 0, err
+	}
+
+	defer r.Body.Close()
+
+	return r.StatusCode, nil
 }

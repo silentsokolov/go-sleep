@@ -142,6 +142,7 @@ func TestComputeInstance_Reset(t *testing.T) {
 	ci.IP = "127.0.0.1"
 	ci.lastAccess = time.Now()
 	ci.startRequest = time.Now()
+	ci.HTTPHealth = true
 
 	ci.Reset()
 
@@ -159,5 +160,9 @@ func TestComputeInstance_Reset(t *testing.T) {
 
 	if !ci.startRequest.IsZero() {
 		t.Error("ComputeInstance.Reset not clear startRequest")
+	}
+
+	if ci.HTTPHealth {
+		t.Error("ComputeInstance.Reset not clear HTTPHealth")
 	}
 }

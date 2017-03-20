@@ -20,6 +20,7 @@ type ComputeInstance struct {
 	stopChan      chan bool
 	lastAccess    time.Time
 	lastError     error
+	HTTPHealth    bool
 	startRequest  time.Time
 }
 
@@ -43,6 +44,7 @@ func NewComputeInstance(p provider.Provider, sleepAfter time.Duration) *ComputeI
 			log.Fatal(err)
 		}
 		instance.SetLastAccess()
+		instance.SetHTTPHealth()
 	}
 
 	return instance
@@ -145,6 +147,13 @@ func (instance *ComputeInstance) SetStatus(s provider.StatusInstance) {
 	instance.currentStatus = s
 }
 
+// SetHTTPHealth ...
+func (instance *ComputeInstance) SetHTTPHealth() {
+	instance.Lock()
+	defer instance.Unlock()
+	instance.HTTPHealth = true
+}
+
 // SetLastAccess ...
 func (instance *ComputeInstance) SetLastAccess() {
 	instance.Lock()
@@ -167,6 +176,7 @@ func (instance *ComputeInstance) Reset() {
 	instance.lastAccess = time.Time{}
 	instance.lastError = nil
 	instance.startRequest = time.Time{}
+	instance.HTTPHealth = false
 }
 
 // Start ...

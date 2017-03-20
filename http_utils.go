@@ -3,9 +3,11 @@ package main
 import (
 	"encoding/json"
 	"html/template"
-	"log"
 	"net/http"
+	"path/filepath"
 	"time"
+
+	"github.com/silentsokolov/go-sleep/log"
 )
 
 //go:generate go-bindata -o templates.go ./templates/...
@@ -23,10 +25,12 @@ var (
 )
 
 func loadTemplates() {
-	tmpls := []string{
-		"wait.html",
+	filenames, err := filepath.Glob("templates/*")
+	if err != nil {
+		log.Fatalln(err)
 	}
-	for _, name := range tmpls {
+	for _, filename := range filenames {
+		name := filepath.Base(filename)
 		asset, err := Asset("templates/" + name)
 		if err != nil {
 			log.Fatal(err)
