@@ -25,10 +25,8 @@ var (
 )
 
 func loadTemplates() {
-	filenames, err := filepath.Glob("templates/*")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	filenames := []string{"wait.html"}
+
 	for _, filename := range filenames {
 		name := filepath.Base(filename)
 		asset, err := Asset("templates/" + name)
