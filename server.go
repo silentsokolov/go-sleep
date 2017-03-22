@@ -296,8 +296,9 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 		case provider.StatusInstanceRunning:
 			if !computer.HTTPHealth {
 				url := fmt.Sprintf("http://%s:%d", computer.IP, route.BackendPort)
-				_, err := ping(url, 3*time.Second)
-				if err, ok := err.(net.Error); ok && err.Timeout() {
+
+				status, err := ping(url, 3*time.Second)
+				if err != nil || status > http.StatusInternalServerError {
 					context.Message = "The server is running, but has not passed HTTP heath"
 					context.StartRequest = &computer.startRequest
 					break
