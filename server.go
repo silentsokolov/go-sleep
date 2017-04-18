@@ -35,6 +35,7 @@ type serverRoute struct {
 	BackendPort  int
 	InstanceName string
 	basicUsers   map[string]string
+	IsProxy      bool
 	basicAuth    *auth.BasicAuth
 	Certificates []tls.Certificate
 }
@@ -161,6 +162,7 @@ func (server *Server) buildServerRoutes(routes []*RouteConfig, instanceKey strin
 				Hostname:     name,
 				BackendPort:  route.BackendPort,
 				InstanceName: instanceKey,
+				IsProxy:      route.IsProxy,
 			}
 			// Init and add cret
 			for _, cretOptions := range route.Certificates {
@@ -289,6 +291,11 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 		if computer.lastError != nil {
 			context.Error = computer.lastError.Error()
 			responseHTML(w, http.StatusOK, "wait.html", context)
+			return
+		}
+
+		if route.IsProxy {
+			next.ServeHTTP(w, r)
 			return
 		}
 

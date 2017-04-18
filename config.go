@@ -39,6 +39,7 @@ type RouteConfig struct {
 	Hostnames    []string             `toml:"hostnames"`
 	AuthGroup    string               `toml:"auth_group"`
 	Certificates []*CertificateConfig `toml:"certificate"`
+	IsProxy      bool                 `toml:"proxy"`
 }
 
 // String ...
