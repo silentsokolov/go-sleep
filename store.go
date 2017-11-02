@@ -115,7 +115,7 @@ func (instance *ComputeInstance) startMonitor(wg *sync.WaitGroup) {
 					instance.SetStatus(providerStatus)
 				} else if !instance.lastAccess.IsZero() && providerStatus == provider.StatusInstanceRunning {
 					duration := time.Since(instance.lastAccess)
-					if duration.Seconds() >= instance.sleepAfter.Seconds() {
+					if instance.ToggleOnRequest() && duration.Seconds() >= instance.sleepAfter.Seconds() {
 						instance.Stop()
 					}
 				}
@@ -177,6 +177,14 @@ func (instance *ComputeInstance) Reset() {
 	instance.lastError = nil
 	instance.startRequest = time.Time{}
 	instance.HTTPHealth = false
+}
+
+//
+func (instance *ComputeInstance) ToggleOnRequest() bool {
+	if instance.sleepAfter.Seconds() >= 0 {
+		return true
+	}
+	return false
 }
 
 // Start ...

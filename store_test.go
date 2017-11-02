@@ -166,3 +166,22 @@ func TestComputeInstance_Reset(t *testing.T) {
 		t.Error("ComputeInstance.Reset not clear HTTPHealth")
 	}
 }
+
+func TestComputeInstance_ToggleOnRequest(t *testing.T) {
+	p := newDummyProvider("test", false)
+
+	var computerTable = []struct {
+		in  *ComputeInstance
+		out bool
+	}{
+		{NewComputeInstance(p, time.Duration(100)*time.Second), true},
+		{NewComputeInstance(p, time.Duration(0)*time.Second), true},
+		{NewComputeInstance(p, time.Duration(-1)*time.Second), false},
+	}
+
+	for _, test := range computerTable {
+		if s := test.in.ToggleOnRequest(); s != test.out {
+			t.Errorf("sleepDuration returned %v, want %v", s, test.out)
+		}
+	}
+}

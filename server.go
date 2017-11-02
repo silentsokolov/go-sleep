@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"math"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -317,8 +316,12 @@ func (server *Server) middlewareWakeup(next http.Handler, address string) http.H
 			next.ServeHTTP(w, r)
 			return
 		case provider.StatusInstanceNotRun:
-			computer.Start()
-			context.Message = "We sent a request to start the instance"
+			if computer.ToggleOnRequest() {
+				computer.Start()
+				context.Message = "We sent a request to start the instance"
+			} else {
+				context.Message = "The server is stopped. Start on request is disabled"
+			}
 		case provider.StatusInstanceStarting:
 			context.Message = "Waiting for the server to start"
 			context.StartRequest = &computer.startRequest
@@ -365,7 +368,7 @@ func sleepDuration(currentSleep int64) time.Duration {
 	if currentSleep > 0 {
 		return time.Duration(currentSleep) * time.Second
 	} else if currentSleep < 0 {
-		return time.Duration(math.MaxInt64)
+		return time.Duration(currentSleep) * time.Second
 	}
 	return defaultSleepAfter
 }

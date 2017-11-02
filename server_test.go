@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math"
 	"reflect"
 	"testing"
 	"time"
@@ -14,7 +13,7 @@ func TestSleepDuration(t *testing.T) {
 	}{
 		{100, time.Duration(100) * time.Second},
 		{0, defaultSleepAfter},
-		{-1, time.Duration(math.MaxInt64)},
+		{-1, time.Duration(-1) * time.Second},
 	}
 
 	for _, test := range timeTable {
